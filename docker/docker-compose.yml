@@ -1,0 +1,13 @@
+version: "2.4"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: nvidia/cuda
+        BASE_IMAGE_VER: 10.2-devel-ubuntu18.04
+    runtime: nvidia
+    image: nodk/fairmot-env
+    volumes:
+      - "../.:/app"

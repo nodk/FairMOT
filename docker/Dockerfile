@@ -1,20 +1,10 @@
-ARG IMAGE_NAME
-FROM ${IMAGE_NAME}:10.2-runtime-ubuntu18.04
-LABEL maintainer "NVIDIA CORPORATION <cudatools@nvidia.com>"
+ARG BASE_IMAGE
+ARG BASE_IMAGE_VER
+FROM ${BASE_IMAGE}:${BASE_IMAGE_VER}
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        cuda-nvml-dev-$CUDA_PKG_VERSION \
-        cuda-command-line-tools-$CUDA_PKG_VERSION \
-cuda-libraries-dev-$CUDA_PKG_VERSION \
-        cuda-minimal-build-$CUDA_PKG_VERSION \
-        libnccl-dev=$NCCL_VERSION-1+cuda10.2 \
-libcublas-dev=10.2.2.89-1 \
-&& \
-    rm -rf /var/lib/apt/lists/*
+# Install Miniconda
+# RUN curl -so ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh \
 
-ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs
-
-# Install some basic utilities
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
@@ -24,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     git \
     bzip2 \
     libx11-6 \
+    libsm6 libxext6 libxrender-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # Create a working directory
@@ -40,12 +31,6 @@ USER user
 # All users can use /home/user as their home directory
 ENV HOME=/home/user
 RUN chmod 777 /home/user
-
-# CT: 4/17
-
-
-# Install Miniconda
-# RUN curl -so ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh \
 
 RUN wget https://repo.continuum.io/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ~/miniconda.sh \
  && chmod +x ~/miniconda.sh \
@@ -73,7 +58,7 @@ RUN conda install -y -c pytorch \
 # Install HDF5 Python bindings
 RUN conda install -y h5py=2.8.0 \
  && conda clean -ya
-RUN pip install h5py-cache==1.0
+RUN pip install h5py-cache==1.0 cython
 
 # Install Torchnet, a high-level framework for PyTorch
 RUN pip install torchnet==0.0.4
